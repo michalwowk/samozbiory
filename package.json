@@ -1,8 +1,9 @@
 {
-  "name": "with-prisma",
+  "name": "samozbiory",
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "check:docs": "node scripts/check-doc-pointers.mjs",
     "db:migrate:deploy": "turbo run db:migrate:deploy",
     "db:migrate:dev": "turbo run db:migrate:dev",
     "db:push": "turbo run db:push",
@@ -10,17 +11,19 @@
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "generate": "turbo run generate",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "skills:sync": "turbo run skills:sync",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "pnpm": "12.4.2",
+    "pnpm": "12.6.0",
     "prettier": "3.9.8",
-    "prisma": "8.0.0-rc.15",
+    "prisma": "8.0.0-rc.17",
     "tsx": "4.23.13",
-    "turbo": "^2.11.3"
+    "turbo": "^2.11.4"
   },
   "engines": {
     "node": ">=24.21.0"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.6.0"
 }

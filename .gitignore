@@ -34,3 +34,15 @@ apps/web/.env
 
 # turbo
 .turbo
+
+# Agent skills, vendored by package CLIs. `prisma skills sync` writes the same
+# content into one directory per harness. A committed copy would silently drift
+# from the installed package version, so AGENTS.md points at node_modules instead
+# and these stay out of git (ADR 0004).
+**/.claude/skills/
+**/.cursor/skills/
+**/.agents/skills/
+**/.devin/skills/
+
+# TypeScript incremental build artifacts
+*.tsbuildinfo
