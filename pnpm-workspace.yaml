@@ -2,9 +2,12 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# Install scripts are opt-in. Both entries below are transitive dev tooling behind next-intl's
+# message extractor, which this project does not use, so their native build steps stay off rather than
+# running arbitrary postinstall code. Flip to true if the extractor is ever adopted.
 allowBuilds:
-  '@parcel/watcher': set this to true or false
-  '@swc/core': set this to true or false
+  '@parcel/watcher': false
+  '@swc/core': false
   esbuild: true
   msgpackr-extract: true
   pnpm: true
