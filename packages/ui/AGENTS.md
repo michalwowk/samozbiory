@@ -22,9 +22,29 @@ shadcn's `form` component *is* a React Hook Form wrapper — `<Form>` is `FormPr
 `Controller`. Adding it drags React Hook Form back into the dependency tree, which this project
 deliberately does not use.
 
-Forms use **TanStack Form** with a local `<Field>` wrapper in this package
-([ADR 0009](../../docs/decisions/0009-tanstack-form-over-react-hook-form.md)). That wrapper arrives with
-the first real form; until then do not reach for shadcn's `form` as a stopgap.
+Forms use **TanStack Form** with the local `<Field>` wrapper in this package
+([ADR 0009](../../docs/decisions/0009-tanstack-form-over-react-hook-form.md)). Zod 4 attaches directly
+through Standard Schema — `validators: { onChange: schema }`, with no resolver package.
+
+`<Field>` deliberately knows nothing about a form instance, so it composes with any `form.Field` render
+prop. It hands the control its a11y wiring rather than cloning children:
+
+```tsx
+<form.Field name="name">
+  {(field) => (
+    <Field label={t("name")} errors={field.state.meta.errors}>
+      {(control) => (
+        <Input
+          {...control}
+          value={field.state.value}
+          onBlur={field.handleBlur}
+          onChange={(e) => field.handleChange(e.target.value)}
+        />
+      )}
+    </Field>
+  )}
+</form.Field>
+```
 
 Every *other* shadcn component is fine — `input`, `label`, `button`, `select`, `checkbox`, `textarea`,
 `dialog`, `command` and the rest carry no RHF coupling.
