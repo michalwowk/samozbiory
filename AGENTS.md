@@ -67,6 +67,8 @@ pnpm check:docs          # every node_modules pointer in the docs still resolves
 pnpm generate            # prisma contract emit → generated/contract.{json,d.ts}
 pnpm db:push             # prisma db update — apply the contract to a dev database
 pnpm db:seed
+pnpm test                # unit tests (vitest)
+pnpm test:e2e            # end-to-end (playwright) — guards the ADR 0006 density gate
 pnpm skills:sync         # refresh vendored agent skills after a Prisma bump
 ```
 

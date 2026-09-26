@@ -56,6 +56,17 @@ pnpm db:seed
 pnpm dev
 ```
 
+## Tests
+
+```sh
+pnpm test        # unit tests
+pnpm test:e2e    # end-to-end; builds the app and needs a seeded database
+```
+
+The end-to-end suite guards the density gate that decides which location pages exist. That gate fails
+silently — nothing throws, pages simply become worthless — so the suite is not optional. See
+[ADR 0006](./docs/decisions/0006-geo-seo-density-gated-pages.md).
+
 ## Working on the database
 
 **Prisma 8 is not the Prisma you know.** There is no `prisma generate`, no `prisma migrate dev`, and no
