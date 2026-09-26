@@ -22,17 +22,16 @@ agent — arriving later.
 | [0010](0010-better-auth-owns-auth-tables.md) | Better Auth owns the auth tables; Prisma reads them as `external` | accepted |
 | [0011](0011-i18n-with-next-intl.md) | next-intl with Polish as an unprefixed default | accepted |
 | [0012](0012-data-access-boundary.md) | Data access boundary: domain functions, transport still open | **proposed** |
-| [0013](0013-date-representation.md) | Date representation: Temporal with a polyfill, or text columns | **proposed** |
+| [0013](0013-date-representation.md) | Dates are Temporal, via a polyfill | accepted |
 | [0014](0014-geospatial-storage.md) | Geospatial storage: plain coordinates or PostGIS | **proposed** |
 | [0015](0015-image-storage.md) | Farm photo storage | **proposed** |
 | [0016](0016-transport-independent-api.md) | The API is independent of its transport | accepted |
 | [0017](0017-additive-only-api-procedures.md) | API procedures are additive only | accepted |
 
-## The four open ones, and what unblocks them
+## The three open ones, and what unblocks them
 
 | # | Waiting on |
 |---|---|
 | 0012 | A deliberate call between oRPC and tRPC. The domain-function layer underneath is common to both and is being built regardless. |
-| 0013 | The first dated model (`Listing`). Cannot be deferred past it — Prisma 8 throws on the first read of a date column under Node 24. |
 | 0014 | Building the map. Starting position is plain `lat`/`lng`, which is the reversible choice. |
 | 0015 | Photo upload becoming a real task. Two requirements already hold: strip EXIF, and sit behind a transforming CDN. |

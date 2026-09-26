@@ -1,4 +1,5 @@
 import createMiddleware from "next-intl/middleware";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { routing } from "./i18n/routing";
 
@@ -9,10 +10,25 @@ import { routing } from "./i18n/routing";
  *
  * next-intl's factory is still called `createMiddleware`; only Next's file convention changed.
  */
-export default createMiddleware(routing);
+const intl = createMiddleware(routing);
+
+/**
+ * Paths that must never be locale-rewritten. `sitemap` and `robots` in particular: a rewritten
+ * `/sitemap/0.xml` 404s, which would point crawlers at nothing (ADR 0006).
+ *
+ * This lives in code rather than in the matcher on purpose. A matcher of the documented shape
+ * `/((?!a|b|.*\..*).*)` silently failed to match nested paths here — `/` was rewritten but
+ * `/samozbiory/malopolskie` was not, so every location page 404ed behind a perfectly green build. The
+ * matcher below is kept to the simplest form that demonstrably works, and the rest is an explicit,
+ * testable check.
+ */
+const NEVER_LOCALISED = /^\/(?:api|sitemap|robots|favicon)(?:[/.]|$)|\.[a-z0-9]+$/i;
+
+export default function proxy(request: NextRequest) {
+  if (NEVER_LOCALISED.test(request.nextUrl.pathname)) return NextResponse.next();
+  return intl(request);
+}
 
 export const config = {
-  // Skip Next internals, the API surface and anything with a file extension. Sitemap and robots are
-  // excluded deliberately: they must never be locale-rewritten (ADR 0006).
-  matcher: ["/((?!api|_next|_vercel|sitemap|robots|.*\..*).*)"],
+  matcher: ["/((?!_next|_vercel).*)"],
 };

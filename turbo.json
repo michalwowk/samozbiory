@@ -3,7 +3,10 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["DATABASE_URL"],
+      // NEXT_PUBLIC_SITE_URL is baked into the output: canonicals, sitemap URLs and JSON-LD. Leaving it
+      // undeclared would let turbo serve a cached build after a domain change, shipping wrong canonical
+      // URLs — a silent SEO failure of exactly the kind ADR 0006 is about.
+      "env": ["DATABASE_URL", "NEXT_PUBLIC_SITE_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
@@ -34,6 +37,14 @@
     "typecheck": {
       "dependsOn": ["^build", "generate"],
       "env": ["DATABASE_URL"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"]
+    },
+    "test:e2e": {
+      "cache": false,
+      "env": ["CI", "DATABASE_URL", "NEXT_PUBLIC_SITE_URL"]
     },
     "lint": {
       "dependsOn": ["^lint"],

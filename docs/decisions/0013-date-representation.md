@@ -1,6 +1,6 @@
-# 0013 — Date representation: Temporal with a polyfill, or text columns
+# 0013 — Dates are Temporal, via a polyfill
 
-- **Status:** proposed — decided when the first dated model lands (`Listing`)
+- **Status:** accepted — decided when `Listing` introduced the first date columns
 - **Date:** 2026-09-26
 
 ## Context
@@ -30,15 +30,27 @@ every page load — so this is a whole-schema decision, not a per-field one.
 3. **Node 26.8.2 or later now.** `Temporal` is built in, but this breaks the released-versions-only
    policy for a second dependency, which ADR 0003 scoped to Prisma alone.
 
-## Recommendation
+## Decision
 
-Option 1. Storing seasons as strings in an application whose purpose is seasonality invites exactly the
+Option 1, `temporal-polyfill@1.0.5`. Storing seasons as strings in an application whose purpose is seasonality invites exactly the
 comparison and timezone bugs the type system should be preventing.
 
-If option 1 is taken, one rule follows and must be documented in `packages/api/AGENTS.md`:
+One rule follows, and is documented in `packages/api/AGENTS.md`:
 **`Temporal` values never cross the RSC boundary.** React serialises `Date` but not class instances, so
 anything reaching a client component is converted to a string first. This also keeps the polyfill out of
 the browser bundle, since date arithmetic stays on the server.
 
 A second consequence: shadcn's `Calendar` (react-day-picker) works in `Date`, so the farmer's season
 picker converts once at the UI boundary.
+
+## Implementation notes
+
+- The polyfill is imported in `packages/database/src/env.ts`, which both `client.ts` and
+  `prisma.config.ts` import — one line covering every entry point.
+- **Two imports are needed, not one.** `temporal-polyfill/full/global` installs the runtime but ships no
+  type declarations (`full/global.d.ts` is literally `export {}`); `temporal-polyfill/types/global` is
+  what makes `Temporal` a known global to `tsc`. Without the second, the contract compiles and the seed
+  fails to typecheck with TS2304.
+- Verified against the live database: `Listing.seasonFrom` reads back as `Temporal.PlainDate` and
+  `Farm.publishedAt` as `Temporal.Instant`, while `@repo/api` hands components ISO strings.
+- Removal when Node 26 becomes LTS: delete both imports and the dependency. Nothing else changes.

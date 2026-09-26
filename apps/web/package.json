@@ -7,17 +7,21 @@
     "dev": "next dev",
     "lint": "eslint --config .eslintrc.js . --max-warnings 0",
     "start": "next start",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/api": "workspace:*",
     "@repo/ui": "workspace:*",
     "next": "16.3.6",
     "next-intl": "4.14.7",
     "nuqs": "2.10.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",

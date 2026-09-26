@@ -1,8 +1,119 @@
 // use prisma-8
 
-model User {
-  id            String    @id @default(cuid(2))
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+// Domain model for the self-harvest farm directory. Terms are fixed by CONTEXT.md — do not coin
+// synonyms for `farm`, `listing`, `inquiry` or the TERYT levels.
+//
+// `@relation(fields:, references:)` goes ONLY on the side holding the foreign key. The inverse side is
+// still declared, as a bare list field with no attributes — verified empirically: without it,
+// `.include('farms')` fails with "Relation 'farms' not found on model 'Region'".
+//
+// Dates are `Date` / `Timestamptz`, which read and write Temporal values. `src/env.ts` loads
+// temporal-polyfill because Node 24 has no global Temporal (ADR 0013).
+
+enum region_level {
+  @@type("pg/text@1")
+
+  Voivodeship  = "voivodeship"
+  County       = "county"
+  Municipality = "municipality"
+}
+
+/// Administrative hierarchy from GUS TERYT. Drives location URLs, the sitemap, breadcrumbs and
+/// JSON-LD. Without it no location page can be generated (ADR 0006).
+model Region {
+  id       String       @id @default(cuid(2))
+  /// Official TERYT code — the stable join key to public statistics, and why this is not just a slug.
+  teryt    String       @unique
+  level    region_level
+  name     String
+  slug     String
+  parentId String?
+  parent   Region?      @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children Region[]     @relation("RegionHierarchy")
+  farms    Farm[]
+
+  /// Bounding box for framing the map and for the coordinate prefilter in proximity search.
+  /// Plain floats rather than PostGIS, as the reversible starting position (ADR 0014).
+  minLat Float
+  maxLat Float
+  minLng Float
+  maxLng Float
+
+  /// Slugs repeat across levels ("krakow" is both a county and a municipality), so uniqueness is
+  /// per level rather than global.
+  @@unique([level, slug])
+  @@index([parentId])
+}
+
+/// Shared taxonomy of what can be picked. Deliberately not free text on Listing: `/[product]/[city]`
+/// landing pages need a closed set to generate from (ADR 0006).
+model Product {
+  id       String    @id @default(cuid(2))
+  slug     String    @unique
+  name     String
+  listings Listing[]
+}
+
+model Farm {
+  id          String       @id @default(cuid(2))
+  slug        String       @unique
+  name        String
+  description String?
+  /// A pin the farmer drags during registration. No geocoding API: more accurate on a rural address
+  /// and free (ADR 0014).
+  lat         Float
+  lng         Float
+  regionId    String
+  region      Region       @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  /// Null means a draft. Only published farms count towards the density thresholds that decide
+  /// whether a location page exists at all.
+  publishedAt Timestamptz?
+  createdAt   Timestamptz  @default(now())
+  listings    Listing[]
+  inquiries   Inquiry[]
+
+  @@index([regionId])
+  /// Supports the bounding-box prefilter; exact distance is computed in the ordering clause.
+  @@index([lat, lng])
+  @@index([publishedAt])
+}
+
+/// One product at one farm for one season. Answers "is this available here, now", which is exactly
+/// what a location page renders.
+model Listing {
+  id         String  @id @default(cuid(2))
+  farmId     String
+  farm       Farm    @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  /// Temporal.PlainDate, not a JavaScript Date. Seasonality is domain logic here, so these are real
+  /// dates rather than strings (ADR 0013).
+  seasonFrom Date
+  seasonTo   Date
+  pricePerKg Decimal?
+  inquiries  Inquiry[]
+
+  @@index([farmId])
+  @@index([productId])
+  /// "What is in season today" runs on every location page render.
+  @@index([seasonFrom, seasonTo])
+}
+
+/// A buyer contacting a farm. Deliberately not a Booking: there is no availability engine, and the
+/// model is shaped so one can be added later without reshaping what exists.
+model Inquiry {
+  id        String      @id @default(cuid(2))
+  farmId    String
+  farm      Farm        @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  /// Optional narrowing to a specific listing; kept nullable so deleting a listing does not delete
+  /// the conversation it started.
+  listingId String?
+  listing   Listing?    @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  message   String
+  createdAt Timestamptz @default(now())
+
+  @@index([farmId])
+  @@index([createdAt])
 }

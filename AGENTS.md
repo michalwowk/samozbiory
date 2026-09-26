@@ -48,7 +48,7 @@ and no `prisma migrate dev`. See [`docs/guides/database.md`](docs/guides/databas
 ```
 apps/web              the application: directory, map, buyer and farmer panels, SEO
 packages/database     Prisma 8 contract and client   ← only @repo/api may import this
-packages/api          domain functions: Zod input, authorisation, Prisma underneath
+packages/api          domain functions: Zod input, authorisation, the ADR 0006 density gate
 packages/ui           Tailwind 4 + shadcn/ui, design tokens authored as TypeScript
 packages/config-*     shared eslint and typescript configuration
 docs/decisions        ADRs — read these before changing an architectural choice
@@ -67,6 +67,8 @@ pnpm check:docs          # every node_modules pointer in the docs still resolves
 pnpm generate            # prisma contract emit → generated/contract.{json,d.ts}
 pnpm db:push             # prisma db update — apply the contract to a dev database
 pnpm db:seed
+pnpm test                # unit tests (vitest)
+pnpm test:e2e            # end-to-end (playwright) — guards the ADR 0006 density gate
 pnpm skills:sync         # refresh vendored agent skills after a Prisma bump
 ```
 

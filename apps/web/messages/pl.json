@@ -3,6 +3,19 @@
     "title": "samozbiory",
     "tagline": "Świeże warzywa i owoce prosto od polskich rolników. Bez pośredników.",
     "findFarm": "Znajdź gospodarstwo",
-    "addFarm": "Dodaj swoje gospodarstwo"
+    "addFarm": "Dodaj swoje gospodarstwo",
+    "allRegions": "Przeglądaj województwa"
+  },
+  "Location": {
+    "voivodeshipTitle": "Samozbiory w województwie {region}",
+    "voivodeshipDescription": "Gospodarstwa oferujące samozbiory w województwie {region}. Świeże owoce i warzywa prosto od rolnika, bez pośredników.",
+    "countyTitle": "Samozbiory — powiat {region}",
+    "countyDescription": "Gospodarstwa oferujące samozbiory w powiecie {region}. Sprawdź, co jest teraz w sezonie.",
+    "farmCount": "{count, plural, =0 {Brak gospodarstw} one {# gospodarstwo} few {# gospodarstwa} other {# gospodarstw}}",
+    "season": "Sezon: {from} – {to}",
+    "counties": "Powiaty",
+    "noFarms": "W tym regionie nie mamy jeszcze żadnego gospodarstwa.",
+    "breadcrumbHome": "Strona główna",
+    "breadcrumbAll": "Samozbiory"
   }
 }

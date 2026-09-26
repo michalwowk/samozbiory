@@ -13,6 +13,8 @@
     "generate": "turbo run generate",
     "lint": "turbo run lint",
     "skills:sync": "turbo run skills:sync",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
