@@ -1,83 +1,89 @@
-# Turborepo + Prisma ORM starter
+# samozbiory
 
-This example helps you quickly set up a Turborepo monorepo with a Next.js app and Prisma ORM. It is community maintained. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+A directory of Polish farms selling directly to consumers. Farmers put themselves on the map and
+publish what they have in season; buyers find them by location and contact them. The point is to
+shorten the supply chain between a field and a kitchen.
 
-## What's inside?
+Search traffic is the distribution mechanism, not an afterthought — location pages are the product.
 
-This Turborepo includes the following packages and apps:
+## Stack
 
-- `web`: a [Next.js](https://nextjs.org/) app
-- `@repo/eslint-config`: shared ESLint flat configurations
-- `@repo/database`: [Prisma ORM](https://prisma.io/) for database access
-- `@repo/typescript-config`: shared `tsconfig.json` files
+| Layer | Choice | Why |
+|---|---|---|
+| App | Next.js 16 (App Router) | server-rendered location pages are the SEO surface |
+| Database | PostgreSQL 18 + Prisma 8 | contract-first, and it ships its own agent documentation |
+| Validation | Zod 4 | guards inputs; Prisma owns output types |
+| Styling | Tailwind 4 + shadcn/ui | design tokens live in `@repo/ui` |
+| Forms | TanStack Form | Standard Schema, so Zod plugs in without a resolver package |
+| Monorepo | Turborepo + pnpm | one app plus marketing pages, sharing tokens and logic |
 
-The example also uses TypeScript, Prettier, PostgreSQL, and Docker Compose.
+Decisions and their rationale live in [`docs/decisions/`](./docs/decisions). Read
+[`CONTEXT.md`](./CONTEXT.md) for the domain model and the Polish↔English glossary.
 
 ## Getting started
 
-### 1. Create the project
+### 1. Configure the environment
 
 ```sh
-pnpm dlx create-turbo@latest -e with-prisma
-cd my-turborepo
+cp .env.example .env                      # docker compose reads this
+cp .env.example packages/database/.env    # keep DATABASE_URL in sync with the values above
+cp .env.example apps/web/.env
 ```
 
-### 2. Start PostgreSQL
+`docker-compose.yml` substitutes `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` from the root
+`.env` and fails loudly if any is missing, so the running database always matches what you declared.
 
-The included [`docker-compose.yml`](./docker-compose.yml) starts a local PostgreSQL server with a database named `turborepo`:
+### 2. Start PostgreSQL
 
 ```sh
 docker compose up -d
 ```
 
-To change the database name, update `POSTGRES_DB` in [`docker-compose.yml`](./docker-compose.yml).
+The service has a healthcheck, so the next step will not race `initdb`.
 
-### 3. Configure environment variables
-
-Copy the example environment file into the database package and web app:
+### 3. Install and emit the data contract
 
 ```sh
-cp .env.example packages/database/.env
-cp .env.example apps/web/.env
-```
-
-Update `DATABASE_URL` in those files if you changed the database name or use a hosted database.
-
-### 4. Create the database schema
-
-Emit the Prisma ORM contract, then initialize an empty database:
-
-```sh
-pnpm generate
-pnpm --filter @repo/database exec prisma db init
-```
-
-After editing the contract, apply development changes with `pnpm db:push`. Use `pnpm --filter @repo/database exec prisma migration plan` to create a migration and `pnpm db:migrate:deploy` to apply committed migrations.
-
-### 5. Seed the database
-
-Edit [`packages/database/src/seed.ts`](./packages/database/src/seed.ts), then run:
-
-```sh
+pnpm install
+pnpm generate        # prisma contract emit → generated/contract.json + contract.d.ts
+pnpm db:push         # prisma db update — applies the contract to a dev database
 pnpm db:seed
 ```
 
-### 6. Build and run the application
+### 4. Run
 
 ```sh
-pnpm build
 pnpm dev
 ```
 
-Open `http://localhost:3000` in your browser.
+## Working on the database
 
-For a detailed walkthrough, see the [Prisma ORM documentation](https://www.prisma.io/docs/orm).
+**Prisma 8 is not the Prisma you know.** There is no `prisma generate`, no `prisma migrate dev`, and no
+`@prisma/client`. You edit a *data contract* and the framework derives types and migrations from it.
 
-## Useful links
+| Task | Command |
+|---|---|
+| Re-emit contract artifacts | `pnpm generate` |
+| Apply contract changes in dev | `pnpm db:push` |
+| Plan a committed migration | `pnpm --filter @repo/database exec prisma migration plan` |
+| Apply committed migrations | `pnpm db:migrate:deploy` |
+| Format the contract | `pnpm --filter @repo/database run format` |
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration options](https://turborepo.dev/docs/reference/configuration)
-- [CLI usage](https://turborepo.dev/docs/reference/command-line-reference)
+There is no first-party Next.js plugin for contract emit (only Vite has one), so `prebuild` and
+`predev` run the emit for you. Editing the contract while `next dev` is running needs a manual
+`pnpm generate`.
+
+## Documentation for coding agents
+
+Every package carries an `AGENTS.md`, with `CLAUDE.md` as a one-line pointer to it, so the same
+instructions work under Claude Code, Codex, Cursor and anything else that reads `AGENTS.md`.
+
+Those files deliberately **point at documentation instead of restating it**: a copy drifts from the
+installed version, a pointer cannot. Next.js documents itself under `apps/web/node_modules/next/dist/docs/`,
+and Prisma 8 ships a full skill under `packages/database/node_modules/@prisma/orm-postgres/skills/prisma-8/`.
+
+```sh
+pnpm skills:sync     # mirrors package-provided skills into .claude/ .cursor/ .agents/ .devin/
+```
+
+Those mirrors are gitignored on purpose — see [ADR 0004](./docs/decisions/0004-agent-docs-are-a-router.md).

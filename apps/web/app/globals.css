@@ -1,0 +1,7 @@
+/* The design system lives in @repo/ui. Tokens are generated from packages/ui/src/tokens.ts, so do not
+   redefine colours here — change the tokens (ADR 0008). */
+@import "@repo/ui/styles/theme.css";
+
+/* Tailwind scans relative to the file declaring the source. theme.css covers @repo/ui's components;
+   this covers this application's own. */
+@source "./";

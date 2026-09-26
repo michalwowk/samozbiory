@@ -8,8 +8,7 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "db:migrate:dev": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:migrate:deploy": {
       "cache": false
@@ -24,10 +23,17 @@
       "cache": false,
       "persistent": true
     },
+    "skills:sync": {
+      "cache": false
+    },
     "generate": {
       "dependsOn": ["^generate"],
       "env": ["DATABASE_URL"],
       "outputs": ["generated/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "generate"],
+      "env": ["DATABASE_URL"]
     },
     "lint": {
       "dependsOn": ["^lint"],

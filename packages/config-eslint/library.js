@@ -10,6 +10,16 @@ module.exports = [
   ...turboConfig,
   prettierConfig,
   {
-    ignores: [".eslintrc.js", "dist/**", "generated/**", "node_modules/**"],
+    ignores: [
+      // vendored agent skills (prisma skills sync) — third-party code, gitignored, not ours to lint
+      "**/.claude/**",
+      "**/.cursor/**",
+      "**/.agents/**",
+      "**/.devin/**",
+      ".eslintrc.js",
+      "dist/**",
+      "generated/**",
+      "node_modules/**",
+    ],
   },
 ];
