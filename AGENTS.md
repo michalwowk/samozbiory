@@ -48,7 +48,7 @@ and no `prisma migrate dev`. See [`docs/guides/database.md`](docs/guides/databas
 ```
 apps/web              the application: directory, map, buyer and farmer panels, SEO
 packages/database     Prisma 8 contract and client   ← only @repo/api may import this
-packages/api          domain functions: Zod input, authorisation, Prisma underneath
+packages/api          domain functions: Zod input, authorisation, the ADR 0006 density gate
 packages/ui           Tailwind 4 + shadcn/ui, design tokens authored as TypeScript
 packages/config-*     shared eslint and typescript configuration
 docs/decisions        ADRs — read these before changing an architectural choice

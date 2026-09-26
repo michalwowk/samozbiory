@@ -1,0 +1,26 @@
+{
+  "name": "@repo/api",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./farms": "./src/farms.ts",
+    "./regions": "./src/regions.ts",
+    "./thresholds": "./src/thresholds.ts"
+  },
+  "scripts": {
+    "lint": "eslint --config .eslintrc.js . --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "26.6.1",
+    "eslint": "10.11.0",
+    "typescript": "7.0.2"
+  }
+}
